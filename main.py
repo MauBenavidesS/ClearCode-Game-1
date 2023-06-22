@@ -2,6 +2,68 @@ import pygame
 from sys import exit
 from random import randint
 
+from pygame.sprite import AbstractGroup
+
+class Player(pygame.sprite.Sprite):
+    def __init__(self, *groups: AbstractGroup) -> None:
+        super().__init__(*groups)
+        player_walk_1 = pygame.image.load('Assets/graphics/player/player_walk_1.png').convert_alpha()
+        player_walk_2 = pygame.image.load('Assets/graphics/player/player_walk_2.png').convert_alpha()
+        self.player_walk_list = [player_walk_1, player_walk_2]
+        self.player_index = 0
+        self.player_jump = pygame.image.load('Assets/graphics/player/jump.png').convert_alpha()
+
+        self.image = self.player_walk_list[self.player_index]
+        self.rect = self.image.get_rect(midbottom = (200, 300))
+        self.gravity = 0
+    
+    def player_input(self):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_SPACE] and self.rect.bottom >= 300:
+            self.gravity = -20
+    
+    def apply_gravity(self):
+        self.gravity += 1
+        self.rect.y += self.gravity
+        if self.rect.bottom >= 300:
+            self.rect.bottom = 300
+    
+    def animation_state(self):
+        if self.rect.bottom < 300:
+            self.image = self.player_jump
+        else:
+            self.player_index += 0.1
+            if self.player_index >= len(self.player_walk_list):
+                self.player_index = 0
+            self.image = self.player_walk_list[int(self.player_index)]
+
+    def update(self):
+        self.player_input()
+        self.apply_gravity()
+        self.animation_state()
+
+class Obstacle(pygame.sprite.Sprite):
+    def __init__(self, type, *groups: AbstractGroup) -> None:
+        super().__init__(*groups)
+
+        if type == 'fly':
+            fly_1 = pygame.image.load('Assets/graphics/fly/Fly1.png').convert_alpha()
+            fly_2 = pygame.image.load('Assets/graphics/fly/Fly2.png').convert_alpha()
+            self.frames = [fly_1, fly_2]
+            y_pos = 210
+        elif type == 'snail':
+            snail_1 = pygame.image.load('Assets/graphics/snail/snail1.png').convert_alpha()
+            snail_2 = pygame.image.load('Assets/graphics/snail/snail2.png').convert_alpha()
+            self.frames = [snail_1, snail_2]
+            y_pos = 300
+
+        self.animation_index = 0
+        self.image = self.frames[self.animation_index]
+        self.rect = self.image.get_rect(midbottom = (randint(900, 110), y_pos))
+    
+    def animation_state(self):
+        pass
+
 def display_score():
     current_time = int(pygame.time.get_ticks() / 100) - start_time
     score_surf = test_font.render(str(current_time), False, (64, 64, 64))
@@ -55,6 +117,9 @@ sky_surf = pygame.image.load("Assets/graphics/Sky.png").convert_alpha()
 ground_surf = pygame.image.load("Assets/graphics/ground.png").convert_alpha()
 ground_pos = 300
 fly_pos = ground_pos-90
+
+player = pygame.sprite.GroupSingle()
+player.add(Player())
 
 # region obstacles
 snail_frame_1 = pygame.image.load('Assets/graphics/snail/snail1.png').convert_alpha()
@@ -155,6 +220,8 @@ while True:
 
         player_animation()
         screen.blit(player_surf, player_rect)
+        player.draw(surface=screen)
+        player.update()
         # endregion
 
         # region obstacle movement
