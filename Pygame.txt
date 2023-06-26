@@ -101,6 +101,12 @@ Collisions
 		## if the player rectangle collides with the snail rectangle print collision
 		# if player_rect.colliderect(snail_rect):
 		#     print("Collision")
+Collision of Sprites
+	spritecollide(sprite, group, dokill)
+		returns a list with all the colliding sprites
+	pygame.sprite.spritecollide(sprite=, group=, bool)
+		access sprite in a GroupSingle using ".sprite". 
+		if the boolean is set to True the sprite is deleted in collision, if False it's not deleted.
 Mouse Position
 	There are two ways of getting the mouse position. 
 		1. pygame.mouse: target the mouse
@@ -149,8 +155,8 @@ Sprite Class
 			- Draw all of the sprites.
 			- Update the sprites.
 	Kinds of Groups
-		- Group
-		- GroupSingle: A group for a single sprite.
+		- Group: In a regular group of sprites, any individual sprite can't be accessed.
+		- GroupSingle: A group for a single sprite. To access a sprite you can use ".sprite"
 		Example
 			# Creates a Group, that contains a sprite, that contains everything on the Player class.
 			class Player(pygame.sprite.Sprite):
@@ -158,12 +164,16 @@ Sprite Class
 			        super().__init__(*groups)
 			        self.image = pygame.image.load('Assets/graphics/player/player_walk_1.png').convert_alpha()
 			        self.rect = self.image.get_rect(midbottom = (200, 250))
-			player = pygame.sprite.GroupSingle() 	# creates sprite
+			player = pygame.sprite.GroupSingle() 	# creates a groupSingle that contains a sprite, the sprite can be accessed as player.sprite
 			player.add(Player())			
 			player.draw(surface=)
 			player.update()
-
-
+Adding Sound
+	self.jump_sound = pygame.mixer.Sound('Assets/audio/jump.mp3')
+	self.jump_sound.set_volume(0.025)
+	self.jump_sound.play()
+	To loop:
+		bg_music.play(loops=-1) # to loop it indefinitely
 
 
 
